@@ -221,6 +221,7 @@ public class FBXImporter : EditorWindow {
 						Actor actor = instance.AddComponent<Actor>();
 						string[] names = actor.GetBoneNames();
 						ArrayExtensions.RemoveAt(ref names, 0);
+						ArrayExtensions.RemoveAt(ref names, 0);
 						actor.Create(names);
 
 						//Create Source Data
@@ -251,10 +252,29 @@ public class FBXImporter : EditorWindow {
 						//Detect Symmetry
 						data.DetectSymmetry();
 
+						for (int i = 0; i < data.Source.Bones.Length; i++) {
+							Debug.Log($"[FBXImporter] Bone {i} = {data.Source.Bones[i].Name}");
+						}
+						
 						//Add Scene
 						data.CreateScene();
 						data.AddSequence();
 
+						var root = data.HasModule<RootModule>() ? data.GetModule<RootModule>() : data.AddModule<RootModule>();
+						root.Data = data;
+						root.Root = 0;
+						root.Topology = RootModule.TOPOLOGY.Biped;
+						root.RightShoulder = data.Source.FindBone("RightShoulder").Index;;
+						root.LeftShoulder = data.Source.FindBone("LeftShoulder").Index;;
+						root.RightHip = data.Source.FindBone("RightUpLeg").Index;;
+						root.LeftHip = data.Source.FindBone("LeftUpLeg").Index;;
+						root.Neck = data.Source.FindBone("Neck").Index;;
+						root.Hips = data.Source.FindBone("Hips").Index;;
+						root.Ground = LayerMask.GetMask("Ground");
+						root.ForwardAxis = Axis.ZPositive;
+						root.Smooth = true;
+
+						
 						EditorUtility.SetDirty(data);
 
 						added += 1;
